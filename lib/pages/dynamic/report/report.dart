@@ -1,5 +1,11 @@
+import 'package:dy/pages/dynamic/app.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../http/http.dart';
+import 'package:dio/dio.dart';
+import 'package:provide/provide.dart';
+import '../../../provide/userInfo.dart';
+import '../../../utils/globla.dart';
 
 class Report extends StatefulWidget{
   
@@ -11,83 +17,144 @@ class Report extends StatefulWidget{
 class _ReportState extends State<Report>{
   List _imgPath = [];
   bool _switchSelected = false; //维护单选开关状态
+  List _getHttpImgPath = [];
+
+  //发表内容控制器
+  TextEditingController _reporController = TextEditingController();
 
   @override
   Widget build(BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('发表动态'),
-        actions: <Widget>[
-          Container(
-            margin: const EdgeInsets.only(top: 18.0, right: 15.0),
-            child: Column(
-              children: <Widget>[
-                GestureDetector(
-                  child: Text('发表'),
-                  onTap: () {
-                    print('2');
-                  },
+    return Provide<UserInfoProvide>(
+      builder: (context, child , userInfoProvide) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text('发表动态'),
+            actions: <Widget>[
+              Container(
+                margin: const EdgeInsets.only(top: 18.0, right: 15.0),
+                child: Column(
+                  children: <Widget>[
+                    GestureDetector(
+                      child: Text('发表'),
+                      onTap: () {
+                        _postReport(userInfoProvide);
+                      },
+                    )
+                  ],
                 )
-              ],
-            )
+              ),
+            ]
           ),
-        ]
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed:() async {
-          await _showModalBottomSheet(context);
-        },
-        tooltip: '选择图片',
-        child: Icon(Icons.add_a_photo),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _TextField(),
-
-          Container(
-            padding: const EdgeInsets.all(5.0),
-            child: Wrap(
-              spacing: 5,
-              runSpacing: 5,
-              children: _generateImages()
-            )
+          floatingActionButton: FloatingActionButton(
+            onPressed:() async {
+              await _showModalBottomSheet(context);
+            },
+            tooltip: '选择图片',
+            child: Icon(Icons.add_a_photo),
           ),
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _TextField(),
 
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: Colors.black12
+              Container(
+                padding: const EdgeInsets.all(5.0),
+                child: Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: _generateImages()
                 )
-              )
-            ),
-            child: Row(
-              children: <Widget>[
-                Checkbox(
-                  value: _switchSelected,
-                  activeColor: Colors.blue, //选中时的颜色
-                  onChanged:(value){
-                    setState(() {
-                      _switchSelected = value;
-                    });
-                  } ,
-                ),
-                Text(
-                  '仅自己可见',
-                  style: TextStyle(
-                    color: Colors.black45
-                  ),
+              ),
+
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Colors.black12
+                    )
+                  )
                 )
-              ],
-            )
+              )             
+            ]
           )
-             
-        ]
-      )   
+        ); 
+      } 
     );
   }
+  
 
+  //发表请求接口
+  void _postReport(userInfoProvide){
+    String reporContent = _reporController.text;
+
+    if(reporContent.length == ''){
+    
+      G.toast('发表内容不能为空');
+      return;
+    }
+    
+    //上传图片
+    if(_imgPath.length > 0){
+      _uploadImg();
+    }
+    
+    //判断图片是否已经上传完成
+    void pathIsHttp(){
+      if(_imgPath.length == _getHttpImgPath.length){
+        createInterfce(reporContent, userInfoProvide);
+      }else{
+        Future.delayed(Duration(milliseconds: 500), () {
+          pathIsHttp();
+        });
+      }
+    }  
+
+    pathIsHttp();
+  }
+
+  
+
+  void createInterfce(reporContent,userInfoProvide){
+     
+    Object data = {
+      "username": userInfoProvide.userData['data']['username'],
+      "dynamicContent": reporContent,
+      "dynamicPic": _getHttpImgPath
+    };
+    
+    postHttp("/api/dynamic/createDynamic", data, userInfoProvide.userData['data']['token'] )
+      .then((response){
+
+        if(response['code'] == 200){
+          G.toast('发表成功');
+        }
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => App()),
+          (route)=>route==null
+        );
+        
+      });
+  }
+  
+   //上传图片
+  void _uploadImg(){
+
+    for(int i = 0 ; i < _imgPath.length; i++){
+      String path = _imgPath[i].path;
+      var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+ 
+      FormData formData = new FormData.from({
+        "file": UploadFileInfo(_imgPath[i], name),
+      });
+  
+      postHttp("/api/upload",formData, null)
+        .then((response){
+          _getHttpImgPath.add(response['data']['url']);
+        });
+    }
+  }
 
   /*底部弹窗 选择相册或者拍照*/
 
@@ -172,6 +239,7 @@ class _ReportState extends State<Report>{
     return TextField(
       autofocus: true,
       maxLines: 8,
+      controller: _reporController,
       decoration: InputDecoration(
         hintText: '随便说点什么',
         border: InputBorder.none,

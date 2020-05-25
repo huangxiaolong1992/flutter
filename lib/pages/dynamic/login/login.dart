@@ -1,10 +1,11 @@
 import 'package:dy/pages/dynamic/app.dart';
+import 'package:dy/pages/dynamic/register/register.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../../../http/http.dart';
 import 'dart:convert';
 import 'package:provide/provide.dart';
 import '../../../provide/userInfo.dart';
+import '../../../utils/globla.dart';
 
 
 class Login extends StatefulWidget{
@@ -87,8 +88,8 @@ class _LoginState extends State<Login>{
                   ),
                 ),
                 onTap: (){
-                  Navigator.of(context).pushNamed(
-                    '/register'
+                  Navigator.of(context).push(
+                    new MaterialPageRoute(builder: (context)=>new Register())
                   );
                 },             
               ),
@@ -121,17 +122,14 @@ class _LoginState extends State<Login>{
   }
 
    /*
-   * 注册
+   * 登录
   */
   void _loginFun() {
     String _userName = _unameController.text;
     String _password = _passwordController.text;
   
     if(_userName.length == 0 || _password.length == 0){
-      Fluttertoast.showToast(
-        msg: "账号和密码不能为空",
-        gravity: ToastGravity.CENTER         
-      );
+      G.toast('账号和密码不能为空');
     }else{
       FocusScope.of(context).unfocus();
 
@@ -140,40 +138,29 @@ class _LoginState extends State<Login>{
         'password': _password
       };
 
-      postHttp("/api/users/login",data)
+      postHttp("/api/users/login",data, null)
         .then((response){
-          final responseJson = json.decode(response.toString());
-          Map<String, dynamic> newData = responseJson ;
-        
-          if(newData['code'] == 304){
-            Fluttertoast.showToast(
-              msg: "账号已被注册",
-              gravity: ToastGravity.CENTER         
-            );
+          if(response['code'] == 304){
+            G.toast('账号已被注册');
+          
           }else 
-            if(newData['code'] == 200){
-              Fluttertoast.showToast(
-                msg: "登录成功",
-                gravity: ToastGravity.CENTER         
-              );
-             
+            if(response['code'] == 200){
+              
+              G.toast('登录成功');
               Provide.value<UserInfoProvide>(context).userInfo(response);
 
-              Navigator.push(context,
-                MaterialPageRoute(builder: (context) => App())
+              Navigator.of(context).pushAndRemoveUntil(
+                new MaterialPageRoute(builder: (context)=>new App()),
+                (route)=>route==null
               );
 
           }else {
-            if(newData['code'] == 401 && newData['msg'] == '密码错误'){
-              Fluttertoast.showToast(
-                msg: "密码错误",
-                gravity: ToastGravity.CENTER         
-              );
+            if(response['code'] == 401 && response['msg'] == '密码错误'){
+          
+              G.toast('密码错误');
             }else{
-              Fluttertoast.showToast(
-                msg: "用户不存在",
-                gravity: ToastGravity.CENTER         
-              );
+          
+              G.toast('用户不存在');
             }
           }
       });

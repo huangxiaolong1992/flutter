@@ -1,9 +1,9 @@
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../../../http/http.dart';
 import 'dart:convert';
 import "../login/login.dart";
+import '../../../utils/globla.dart';
 
 
 class Register extends StatefulWidget{
@@ -93,10 +93,7 @@ class _RegisterState extends State<Register>{
     String _password = _passwordController.text;
   
     if(_userName.length == 0 || _password.length == 0){
-      Fluttertoast.showToast(
-        msg: "账号和密码不能为空",
-        gravity: ToastGravity.CENTER         
-      );
+      G.toast('账号和密码不能为空');
     }else{
       FocusScope.of(context).unfocus();
 
@@ -105,21 +102,15 @@ class _RegisterState extends State<Register>{
         'password': _password
       };
 
-      postHttp("/api/users/register",data)
+      postHttp("/api/users/register",data, null)
         .then((response){
-          final responseJson = json.decode(response.toString());
-          Map<String, dynamic> newData = responseJson ;
-
-          if(newData['code'] == 304){
-            Fluttertoast.showToast(
-              msg: "账号已被注册",
-              gravity: ToastGravity.CENTER         
-            );
-          }else if(newData['code'] == 200){
-            Fluttertoast.showToast(
-              msg: "注册成功",
-              gravity: ToastGravity.CENTER         
-            );
+  
+          if(response['code'] == 304){
+            G.toast('账号已被注册');
+          
+          }else if(response['code'] == 200){
+            
+            G.toast('注册成功');
 
             Navigator.push(context,
               MaterialPageRoute(builder: (context) => Login(
