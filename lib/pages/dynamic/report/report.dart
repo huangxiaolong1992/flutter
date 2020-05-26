@@ -16,7 +16,6 @@ class Report extends StatefulWidget{
 
 class _ReportState extends State<Report>{
   List _imgPath = [];
-  bool _switchSelected = false; //维护单选开关状态
   List _getHttpImgPath = [];
 
   //发表内容控制器
@@ -87,7 +86,7 @@ class _ReportState extends State<Report>{
   void _postReport(userInfoProvide){
     String reporContent = _reporController.text;
 
-    if(reporContent.length == ''){
+    if(reporContent.length == 0){
     
       G.toast('发表内容不能为空');
       return;
@@ -112,7 +111,6 @@ class _ReportState extends State<Report>{
     pathIsHttp();
   }
 
-  
 
   void createInterfce(reporContent,userInfoProvide){
      

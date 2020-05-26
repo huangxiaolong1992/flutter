@@ -1,10 +1,6 @@
-import 'package:dy/pages/dynamic/login/login.dart';
 import 'package:flutter/material.dart';
 import './pages/dynamic/app.dart';
 import './pages/loading/loading.dart';
-import './pages/dynamic/report/report.dart';
-import './pages/dynamic/mine/mine.dart';
-import './pages/dynamic/register/register.dart';
 import 'dart:ui';
 import 'package:provide/provide.dart';
 import './provide/userInfo.dart';
@@ -33,11 +29,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
   
       routes: <String, WidgetBuilder> {
-        '/app':      (BuildContext content) => new App(),
-        '/report':   (BuildContext content) => new Report(),
-        '/mine':     (BuildContext content) => new Mine(),
-        '/login':    (BuildContext content) => new Login(),
-        '/register': (BuildContext content) => new Register()
+        '/app': (BuildContext content) => new App()
       },
       home: new Scaffold(
         appBar: PreferredSize(

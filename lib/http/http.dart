@@ -9,7 +9,7 @@ Dio dio = new Dio(BaseOptions(
   )
 );
 
-final String baseUrl = "http://192.168.0.102:8080";
+final String baseUrl = "http://192.168.50.118:8080";
 
 Future postHttp(String url, data, token) async {
   var  options = Options(headers: {

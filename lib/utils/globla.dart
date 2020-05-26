@@ -13,8 +13,6 @@ class G{
 
   //时间戳转成时间
   static  changeDate(String timeStamp){ 
-    print('1');
-
     var time = new DateTime.fromMillisecondsSinceEpoch(int.parse(timeStamp));
     return time;
   } 

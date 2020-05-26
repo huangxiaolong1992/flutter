@@ -42,9 +42,10 @@ class _App extends State<App>{
               ),
               body: TabBarView(
                 children: choices.map((Choice choice){
+                       
                   return Container(
                     alignment: Alignment.center,
-                    child: PullToPushList(),
+                    child: choice.title == '全体' ? PullToPushList() : Text(choice.title),
                   );
                 }).toList(),
               ),
@@ -84,10 +85,7 @@ Widget _report(data, context){
       icon: Icon(Icons.add_circle),
       tooltip: "Alarm",
       onPressed: () {
-        
-        // Navigator.of(context).pushNamed(
-        //   '/report'
-        // );
+
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => Report())
@@ -128,9 +126,9 @@ class Choice {
 
 const List<Choice> choices = const <Choice>[
   const Choice(title: '全体'),
-  // const Choice(title: '精华'),
-  // const Choice(title: '收藏'),
-  // const Choice(title: '我的')
+  const Choice(title: '精华'),
+  const Choice(title: '收藏'),
+  const Choice(title: '我的')
 ];
 
 class ChoiceCardWidget extends StatelessWidget {
@@ -147,9 +145,8 @@ class ChoiceCardWidget extends StatelessWidget {
         color: Colors.white,
         child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-            
               Text(choice.title,style: TextStyle(fontSize: 50.0))
             ],
           ),

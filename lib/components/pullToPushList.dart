@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import '../pages/dynamic/mine/mine.dart';
 import 'package:provide/provide.dart';
 import '../provide/userInfo.dart';
 import '../pages/dynamic/login/login.dart';
@@ -24,6 +23,13 @@ class _PullToPushListState extends State<PullToPushList> {
       RefreshController(initialRefresh: true);
 
   void _onRefresh() async{
+
+	setState(() {
+    pageNum = 1;
+
+	  _getListDate();
+
+	});
     
     // monitor network fetch
     await Future.delayed(Duration(milliseconds: 1000));
@@ -38,7 +44,7 @@ class _PullToPushListState extends State<PullToPushList> {
    
     if(mounted)
     setState(() {
-     // print('1,$mounted');
+     
     });
      
     _refreshController.loadComplete();
@@ -77,10 +83,13 @@ class _PullToPushListState extends State<PullToPushList> {
       token
     )
       .then((response){
-       
-        if(response['result'].length > 0){
+        if(pageNum == 1){
           setState(() {  
-        
+            lists.clear();
+            lists.addAll(response['result']);
+          });
+        }else{
+          setState(() {  
             lists.addAll(response['result']);
           });
         } 
